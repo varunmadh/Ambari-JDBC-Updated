@@ -1,0 +1,5 @@
+- name: Restart ambari-agent service to apply changes
+  ansible.builtin.systemd:
+    name: ambari-agent
+    state: restarted
+    enabled: yes

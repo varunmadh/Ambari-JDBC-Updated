@@ -1,0 +1,45 @@
+- name: Start ambari-server service
+  ansible.builtin.systemd:
+    name: ambari-server
+    state: started
+    enabled: yes
+
+
+- name: Ensure target directory exists
+  file:
+    path: /home/test
+    state: directory
+    mode: '0755'
+
+- name: Download PostgreSQL JDBC driver
+  get_url:
+    url: https://jdbc.postgresql.org/download/postgresql-42.7.4.jar
+    dest: /home/test/postgresql-42.7.4.jar
+    mode: '0644'
+
+- name: Verify the JDBC driver file
+  stat:
+    path: /home/test/postgresql-42.7.4.jar
+  register: jdbc_stat
+
+- name: Display file verification status
+  debug:
+    msg: "JDBC driver download successful. File size: {{ jdbc_stat.stat.size }} bytes"
+  when: jdbc_stat.stat.exists
+
+- name: Configure Ambari Server with the JDBC driver
+  command: >
+    ambari-server setup --jdbc-db=postgres --jdbc-driver=/home/test/postgresql-42.7.4.jar
+  args:
+    creates: /var/lib/ambari-server/resources/postgresql-42.7.4.jar
+  when: jdbc_stat.stat.exists
+
+- name: Verify Ambari Server JDBC driver setup
+  stat:
+    path: /var/lib/ambari-server/resources/postgresql-42.7.4.jar
+  register: ambari_jdbc_stat
+
+- name: Confirm JDBC driver setup success
+  debug:
+    msg: "Ambari Server is configured with JDBC driver. Driver size: {{ ambari_jdbc_stat.stat.size }} bytes"
+  when: ambari_jdbc_stat.stat.exists

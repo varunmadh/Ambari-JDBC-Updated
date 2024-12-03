@@ -1,0 +1,12 @@
+- name: Install ambari-server on Ambari server
+  ansible.builtin.apt:
+    name: ambari-server=2.7.9.0-110
+    state: present
+    force: yes
+    allow_unauthenticated: yes
+
+- name: Install ambari-agent on Ambari server
+  ansible.builtin.apt:
+    name: ambari-agent
+    state: present
+    allow_unauthenticated: yes

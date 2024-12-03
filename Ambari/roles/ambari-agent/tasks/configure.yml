@@ -1,0 +1,6 @@
+- name: Ensure the Ambari server's DNS name is set in ambari-agent.ini
+  ansible.builtin.lineinfile:
+    path: /etc/ambari-agent/conf/ambari-agent.ini
+    regexp: '^hostname=.*'
+    line: "hostname=aisandboxvm2"
+    backup: yes

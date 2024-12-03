@@ -1,0 +1,28 @@
+- name: Run ambari-server setup
+  expect:
+    command: ambari-server setup --database=postgres --databasehost={{ db_hostname }} --databaseport={{ db_port }} --databasename={{ db_name }} --databaseusername={{ db_user }} --databasepassword={{ db_password }}
+    responses:
+      "Customize user account for ambari-server daemon": "y"
+      "Enter user account": "root"
+      "Do you want to change Oracle JDK": "y"
+      "Enter choice": "2"
+      "Path to JAVA_HOME": "/usr/lib/jvm/java-1.8.0-openjdk-amd64"
+      "Do you accept the Oracle Binary Code License Agreement": "y"
+      "Enable Ambari Server to download and install GPL Licensed LZO packages": "y"
+      "Proceed with configuring remote database connection properties": "y"
+    timeout: 30
+    chdir: /root
+  register: ambari_setup_output
+
+- name: Display setup script output
+  debug:
+    var: ambari_setup_output.stdout
+
+- name: Check if jdbc is present in ambari.properties
+  command: grep 'jdbc' /etc/ambari-server/conf/ambari.properties
+  register: grep_output
+  ignore_errors: true
+
+- name: Show grep output
+  debug:
+    msg: "{{ grep_output.stdout }}"

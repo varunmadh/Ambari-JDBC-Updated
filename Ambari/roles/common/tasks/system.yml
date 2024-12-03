@@ -1,0 +1,25 @@
+- name: Add or update entry in /etc/hosts
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    line: "<IP> <HOSTNAME>"  # Replace <IP> and <HOSTNAME> with actual values
+    state: present
+    validate: 'grep -q "^<IP> <HOSTNAME>" %s || true'
+
+- name: Install required packages
+  ansible.builtin.apt:
+    name:
+      - curl
+      - unzip
+      - tar
+      - wget
+      - gcc
+      - python2
+      - python2-dev
+      - openssl
+      - ntp
+    state: present
+
+- name: Install OpenJDK 8 JRE Headless
+  ansible.builtin.apt:
+    name: openjdk-8-jre-headless
+    state: present

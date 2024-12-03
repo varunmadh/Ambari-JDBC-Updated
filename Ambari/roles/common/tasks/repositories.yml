@@ -1,0 +1,22 @@
+- name: Ensure /etc/apt/sources.list.d directory exists
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d
+    state: directory
+    mode: "0755"
+
+- name: Download ambari.list file
+  ansible.builtin.get_url:
+    url: "https://clemlabs.s3.eu-west-3.amazonaws.com/ubuntu22/ambari-release/2.7.8.0.0-101/ambari.list"
+    dest: "/etc/apt/sources.list.d/ambari.list"
+    mode: "0644"
+
+- name: Download odp.list file
+  ansible.builtin.get_url:
+    url: "https://clemlabs.s3.eu-west-3.amazonaws.com/ubuntu22/odp-release/1.2.1.0-134/odp.list"
+    dest: "/etc/apt/sources.list.d/odp.list"
+    mode: "0644"
+
+- name: Add missing GPG key for repository
+  apt_key:
+    keyserver: keyserver.ubuntu.com
+    id: 449E83E81403D1C5

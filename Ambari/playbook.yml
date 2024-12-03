@@ -1,0 +1,57 @@
+- name: Setup Common Configuration
+  hosts: hadoop
+  become: yes
+  roles:
+    - common
+
+- name: Setup Ambari Server
+  hosts: ambari-servers
+  become: yes
+  roles:
+    - ambari-server
+  
+  vars:
+    db_hostname: "100.104.3.233"  # Replace with your DB hostname
+    db_port: "31486"
+    db_name: "ambari"
+    db_user: "ambari"
+    db_password: "ambari"
+    java_home: "/usr/lib/jvm/java-8-openjdk-amd64"
+
+  tasks:
+    - name: Rename metainfo files for various services
+      shell: |
+        mv /var/lib/ambari-server/resources/stacks/ODP/1.0/services/{{ item }}/metainfo.xml /var/lib/ambari-server/resources/stacks/ODP/1.0/services/{{ item }}/metainfo_backup.xml
+        mv /var/lib/ambari-server/resources/stacks/ODP/1.2/services/{{ item }}/metainfo.xml /var/lib/ambari-server/resources/stacks/ODP/1.2/services/{{ item }}/metainfo_backup.xml
+      loop:
+        - KNOX
+        - OOZIE
+        - LOGSEARCH
+        - NIFI_REGISTRY
+        - SPARK3
+        - ZEPPELIN
+        - NIFI
+        - OZONE
+        - SQOOP
+        - RANGER_KMS
+    
+- name: Configure and Start Ambari Agent
+  hosts: hadoop
+  become: yes
+  tasks:
+    - name: Install Ambari Agent
+      ansible.builtin.apt:
+        name: ambari-agent
+        state: present
+
+    - name: Start ambari-agent service
+      ansible.builtin.systemd:
+        name: ambari-agent
+        state: started
+        enabled: yes
+
+- name: Setup Ambari Agent
+  hosts: ambari-agents
+  become: yes
+  roles:
+    - ambari-agent
